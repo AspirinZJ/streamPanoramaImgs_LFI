@@ -2,8 +2,8 @@
 #include <opencv2/opencv.hpp>
 
 #define DELAY 1
-#define VIDEO_WIDTH 3840
-#define VIDEO_HEIGHT 2160
+#define VIDEO_WIDTH 1920
+#define VIDEO_HEIGHT 1080
 
 int main(int, char **)
 {
@@ -27,7 +27,8 @@ int main(int, char **)
 	// set framerate of the videoCapture
 	videoCapture.set(CV_CAP_PROP_FPS, 30);
 
-//	int fourcc = cv::VideoWriter::fourcc('M', 'J', 'P', 'G'); videoCapture.set(CV_CAP_PROP_FOURCC, fourcc);
+	int fourcc = cv::VideoWriter::fourcc('M', 'J', 'P', 'G');
+	videoCapture.set(CV_CAP_PROP_FOURCC, fourcc);
 
 	std::cout << "Start grabbing: \n Press 's' to save image and press 'q' to terminate.\n";
 

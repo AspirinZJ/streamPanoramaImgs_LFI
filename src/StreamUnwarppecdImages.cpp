@@ -28,9 +28,9 @@ void streamImage(int camNum, unsigned int imgSaveNum = 0, unsigned int scale = 1
 
 int main(int argc, char *argv[])
 {
-	if (2 != argc)
+	if (3 != argc)
 	{
-		std::cerr << "Error: not enough arguments.\nUsage: [" << argv[0] << "] [initial image number to save]\n";
+		std::cerr << "Error: not enough arguments.\nUsage: [" << argv[0] << "] [initial image number to save] [camera number]\n";
 		return 1;
 	}
 
@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
 	std::string cameraConfig = rootValue["current_camera"].asString();
 	recordedWidth = rootValue["camera_record_res"][0].asInt();
 	recordedHeight = rootValue["camera_record_res"][1].asInt();
+	scaleRatio = rootValue["display_ratio"].asInt();
 
 	Json::Value cameraValue;
 	std::ifstream ifsCamera("../config/" + cameraConfig + ".json");
@@ -58,7 +59,6 @@ int main(int argc, char *argv[])
 	ifsCamera >> cameraValue;
 	ifsCamera.close();
 
-	scaleRatio = cameraValue[1]["display_ratio"].asInt();
 	calibratedWidth = cameraValue[1]["raw_resolution"][0].asInt();
 	calibratedHeight = cameraValue[1]["raw_resolution"][1].asInt();
 	recordRatioX = (double) calibratedWidth / recordedWidth;
@@ -78,7 +78,8 @@ int main(int argc, char *argv[])
 	bottomCutoff = cameraValue[1]["bottom_cutoff"].asDouble();
 
 	unsigned int imgSaveNum = std::stoi(argv[1]);
-	streamImage(0, imgSaveNum);
+	int camNum = std::stoi(argv[2]);
+	streamImage(camNum, imgSaveNum);
 
 	return 0;
 }
@@ -132,13 +133,13 @@ void streamImage(int camNum, unsigned int imgSaveNum, unsigned int scale)
 		// finalImage = finalImage(finalROI);
 
 		// save unwrapped images
-		if (cv::waitKey(50) == 's' || cv::waitKey(50) == 'S')
+		if (cv::waitKey(5) == 's' || cv::waitKey(5) == 'S')
 		{
 			std::string imName = "../raw_images/" + std::to_string(++imgSaveNum) + ".png";
 			cv::imwrite(imName, finalImage);
 			std::cout << "Wrote to: " << imName << std::endl;
 		}
-		else if (cv::waitKey(50) == 'q' || cv::waitKey(50) == 'Q')
+		else if (cv::waitKey(5) == 'q' || cv::waitKey(5) == 'Q')
 		{
 			std::cout << "Quitting program." << std::endl;
 			return;

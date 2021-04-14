@@ -1,4 +1,6 @@
 #include <iostream>
+#include <chrono>
+#include <utility>
 
 #include "ImageWrapper.h"
 #include "sin_cos_table.h"
@@ -7,16 +9,19 @@
 using namespace cv;
 using namespace std;
 
-ImageWrapper::ImageWrapper()
-{}
+ImageWrapper::ImageWrapper() {}
 
 ImageWrapper::~ImageWrapper()
-{}
+{
+	for (int x = 0; x < unwarpImageCols; ++x) { delete[] *(this->indTable + x); }
+	delete[] this->indTable;
+	cout << "\nDestroy image wrapper successfully!\n";
+}
 
 bool ImageWrapper::initImageWrapper(unsigned cols, unsigned rows)
 {
-	if (theta_acc != NULL) delete theta_acc;
-	if (trho != NULL) delete trho;
+	if (theta_acc != nullptr) delete theta_acc;
+	if (trho != nullptr) delete trho;
 
 	orginalImageRows = cols;
 	orginalImageCols = rows;
@@ -46,31 +51,42 @@ bool ImageWrapper::initImageWrapper(unsigned cols, unsigned rows)
 		theta_acc[x] = theta;
 	}
 
+	this->indTable = new short *[unwarpImageCols];
+	for (size_t x = 0; x < unwarpImageCols; ++x)
+	{
+		*(this->indTable + x) = new short[2 * unwarpImageRows];
+		for (size_t y = 0; y < unwarpImageRows; ++y)
+		{
+			short xVal = trho[y] * tsin[(int) (theta_acc[x] + 0.5)] + v0;
+			short yVal = trho[y] * tcos[(int) (theta_acc[x] + 0.5)] + u0;
+			*(*(this->indTable + x) + 2 * y) = xVal;
+			*(*(this->indTable + x) + 2 * y + 1) = yVal;
+		}
+	}
+
 	return true;
 }
 
 cv::Mat ImageWrapper::getImage(cv::Mat image)
 {
-	srcImage = image;
-	dstImage = cv::Mat(unwarpImageRows, unwarpImageCols, CV_8UC3, Scalar::all(0));
+	// chrono::time_point<chrono::steady_clock> tStart = chrono::steady_clock::now();
 
-	u0 = orginalImageRows / 2.0;
-	v0 = orginalImageCols / 2.0;
+	srcImage = std::move(image);
+	dstImage = cv::Mat(unwarpImageRows, unwarpImageCols, CV_8UC3, Scalar::all(0));
 
 	// #pragma omp parallel for
 	for (int x = 0; x < unwarpImageCols; x++)
 	{
-		// #pragma omp parallel for
 		for (int y = 0; y < unwarpImageRows; y++)
 		{
-			dstImage.at<Vec3b>(y, x)[0] = srcImage.at<Vec3b>(trho[y] * tsin[(int) (theta_acc[x] + 0.5)] + v0,
-															 trho[y] * tcos[(int) (theta_acc[x] + 0.5)] + u0)[0];
-			dstImage.at<Vec3b>(y, x)[1] = srcImage.at<Vec3b>(trho[y] * tsin[(int) (theta_acc[x] + 0.5)] + v0,
-															 trho[y] * tcos[(int) (theta_acc[x] + 0.5)] + u0)[1];
-			dstImage.at<Vec3b>(y, x)[2] = srcImage.at<Vec3b>(trho[y] * tsin[(int) (theta_acc[x] + 0.5)] + v0,
-															 trho[y] * tcos[(int) (theta_acc[x] + 0.5)] + u0)[2];
+			dstImage.at<Vec3b>(y, x) = srcImage.at<Vec3b>(*(*(this->indTable + x) + 2 * y),
+														  *(*(this->indTable + x) + 2 * y + 1));
 		}
 	}
+
+	// chrono::time_point<chrono::steady_clock> tEnd = chrono::steady_clock::now();
+	// chrono::steady_clock::duration duration = chrono::duration_cast<chrono::microseconds>(tEnd - tStart);
+	// cout << "Time duration of the image wrapper: " << duration.count() << endl;
 
 	return dstImage;
 }
