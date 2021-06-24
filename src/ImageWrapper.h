@@ -14,7 +14,7 @@ private:
 	cv::Mat dstImage; /**< TODO: describe */
 	cv::Mat reSizeImage; /**< TODO: describe */
 
-	unsigned orginalImageCols, orginalImageRows, unwarpImageCols, unwarpImageRows; /**< TODO: describe */
+	unsigned originalImageCols, originalImageRows, unwarpImageCols, unwarpImageRows; /**< TODO: describe */
 	unsigned displayedHeight = 831, displayedWidth = 1591;
 
 	double *trho = nullptr; /**< TODO: describe */
@@ -31,5 +31,4 @@ private:
 	* *(*(this->indTable + x) + 2 * y + 1) --> yVal;
 	*/
 	short **indTable;
-
 };

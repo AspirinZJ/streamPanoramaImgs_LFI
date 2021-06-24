@@ -23,9 +23,9 @@ bool ImageWrapper::initImageWrapper(unsigned cols, unsigned rows)
 	if (theta_acc != nullptr) delete theta_acc;
 	if (trho != nullptr) delete trho;
 
-	orginalImageRows = cols;
-	orginalImageCols = rows;
-	int R = std::min(orginalImageRows, orginalImageCols) / 2;
+	originalImageRows = cols;
+	originalImageCols = rows;
+	int R = std::min(originalImageRows, originalImageCols) / 2;
 	unwarpImageRows = R * ARC_SCALE;
 	unwarpImageCols = 2 * PI * R * REAL_R;
 	double d_tmp = 1000.0 / unwarpImageRows, tmp = unwarpImageRows * d_tmp;
@@ -41,8 +41,8 @@ bool ImageWrapper::initImageWrapper(unsigned cols, unsigned rows)
 	double theta, d_theta;
 	theta = 0.0;
 	d_theta = RMAX / R / REAL_R;
-	u0 = orginalImageRows / 2.0;
-	v0 = orginalImageCols / 2.0;
+	u0 = originalImageRows / 2.0;
+	v0 = originalImageCols / 2.0;
 
 	theta_acc = new double[unwarpImageCols];
 	for (int x = 0; x < unwarpImageCols; x++)
@@ -69,8 +69,7 @@ bool ImageWrapper::initImageWrapper(unsigned cols, unsigned rows)
 
 cv::Mat ImageWrapper::getImage(cv::Mat image)
 {
-	// chrono::time_point<chrono::steady_clock> tStart = chrono::steady_clock::now();
-
+	// auto tStart = std::chrono::steady_clock::now();
 	srcImage = std::move(image);
 	dstImage = cv::Mat(unwarpImageRows, unwarpImageCols, CV_8UC3, Scalar::all(0));
 
@@ -84,9 +83,9 @@ cv::Mat ImageWrapper::getImage(cv::Mat image)
 		}
 	}
 
-	// chrono::time_point<chrono::steady_clock> tEnd = chrono::steady_clock::now();
-	// chrono::steady_clock::duration duration = chrono::duration_cast<chrono::microseconds>(tEnd - tStart);
-	// cout << "Time duration of the image wrapper: " << duration.count() << endl;
+//	auto tEnd = std::chrono::steady_clock::now();
+//	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart).count();
+//	std::cout << "Time spent by image wrapper: " << duration << std::endl;
 
 	return dstImage;
 }

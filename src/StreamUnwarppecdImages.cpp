@@ -30,7 +30,8 @@ int main(int argc, char *argv[])
 {
 	if (3 != argc)
 	{
-		std::cerr << "Error: not enough arguments.\nUsage: [" << argv[0] << "] [initial image number to save] [camera number]\n";
+		std::cerr << "Error: not enough arguments.\nUsage: [" << argv[0]
+				  << "] [initial image number to save] [camera number]\n";
 		return 1;
 	}
 
@@ -94,8 +95,11 @@ void streamImage(int camNum, unsigned int imgSaveNum, unsigned int scale)
 	}
 
 	// set openCV capture resolution
-	video.set(CV_CAP_PROP_FRAME_HEIGHT, 1080);
 	video.set(CV_CAP_PROP_FRAME_WIDTH, 1920);
+	video.set(CV_CAP_PROP_FRAME_HEIGHT, 1080);
+
+	int fourcc = cv::VideoWriter::fourcc('M', 'J', 'P', 'G');
+	video.set(CV_CAP_PROP_FOURCC, fourcc);
 
 	cv::Mat frame, resizedImage;
 
@@ -112,7 +116,11 @@ void streamImage(int camNum, unsigned int imgSaveNum, unsigned int scale)
 
 	while (isNotEnd)
 	{
+		auto tStart = std::chrono::steady_clock::now();
 		isNotEnd = video.read(frame);
+		auto tEnd = std::chrono::steady_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(tEnd - tStart);
+		std::cout << "Time spent: " << duration.count() << std::endl;
 		if (frame.empty()) { continue; }
 		if (1 != scale) { cv::resize(frame, frame, cv::Size(), scale, scale, cv::INTER_LINEAR); }
 
@@ -126,6 +134,7 @@ void streamImage(int camNum, unsigned int imgSaveNum, unsigned int scale)
 		cv::Rect myROI2(0, (int) (image.rows / topCutoff), image.cols, (int) (image.rows / bottomCutoff));
 		cv::Mat finalImage = image(myROI2);
 
+
 		cv::imshow("final", finalImage);
 
 		// cut margins out
@@ -133,16 +142,18 @@ void streamImage(int camNum, unsigned int imgSaveNum, unsigned int scale)
 		// finalImage = finalImage(finalROI);
 
 		// save unwrapped images
-		if (cv::waitKey(5) == 's' || cv::waitKey(5) == 'S')
+		if (cv::waitKey(1) == 's' || cv::waitKey(1) == 'S')
 		{
 			std::string imName = "../raw_images/" + std::to_string(++imgSaveNum) + ".png";
 			cv::imwrite(imName, finalImage);
 			std::cout << "Wrote to: " << imName << std::endl;
 		}
-		else if (cv::waitKey(5) == 'q' || cv::waitKey(5) == 'Q')
+		else if (cv::waitKey(1) == 'q' || cv::waitKey(1) == 'Q')
 		{
 			std::cout << "Quitting program." << std::endl;
 			return;
 		}
+		cv::waitKey(1);
+
 	}
 }

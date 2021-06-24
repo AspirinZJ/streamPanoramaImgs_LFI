@@ -8,27 +8,29 @@
 int main(int, char **)
 {
 	cv::Mat frame;
-	cv::VideoCapture videoCapture; // initialize video capture
-	const int deviceID = 0; // 0 = open default camera
-	const int apiID = cv::CAP_ANY;    // 0 = auto detect default API
+	int cameraInd = 0;
+	//	cv::VideoCapture video = cv::VideoCapture(cameraInd); // initialize video capture
+	//	const int deviceID = 0; // 0 = open default camera
+	//	const int apiID = cv::CAP_ANY;    // 0 = auto detect default API
 	int capNum = 0; // capture counting number
-
-	videoCapture.open(deviceID, apiID);    // open selected camera using selected API
-	if (!videoCapture.isOpened())
+	//
+	//	video.open(deviceID, apiID);    // open selected camera using selected API
+	auto video = cv::VideoCapture(cameraInd);
+	if (!video.isOpened())
 	{
 		std::cerr << "Error: cannot open device!/n";
 		return -1;
 	}
 
 	// set the width and height of the frame, otherwise the default will be 640x480
-	videoCapture.set(CV_CAP_PROP_FRAME_WIDTH, VIDEO_WIDTH);
-	videoCapture.set(CV_CAP_PROP_FRAME_HEIGHT, VIDEO_HEIGHT);
+	video.set(CV_CAP_PROP_FRAME_WIDTH, VIDEO_WIDTH);
+	video.set(CV_CAP_PROP_FRAME_HEIGHT, VIDEO_HEIGHT);
 
 	// set framerate of the videoCapture
-	videoCapture.set(CV_CAP_PROP_FPS, 30);
+	//	video.set(CV_CAP_PROP_FPS, 30);
 
 	int fourcc = cv::VideoWriter::fourcc('M', 'J', 'P', 'G');
-	videoCapture.set(CV_CAP_PROP_FOURCC, fourcc);
+	video.set(CV_CAP_PROP_FOURCC, fourcc);
 
 	std::cout << "Start grabbing: \n Press 's' to save image and press 'q' to terminate.\n";
 
@@ -36,7 +38,7 @@ int main(int, char **)
 	while (true)
 	{
 		// wait for a new frame from camera and store it into frame
-		videoCapture.read(frame); // or videoCapture >> frame;
+		video.read(frame); // or videoCapture >> frame;
 		if (frame.empty()) { continue; }
 
 		cv::imshow("Live", frame);
@@ -48,7 +50,7 @@ int main(int, char **)
 		}
 		if (cv::waitKey(DELAY) == 'q' || cv::waitKey(DELAY) == 'Q') { break; }
 	}
-	videoCapture.release();
+	video.release();
 	// the camera will be destroyed automatically in VideoCapture destructor.
 	return 0;
 }
