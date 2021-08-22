@@ -10,7 +10,7 @@ set(Jsoncpp_LIBRARY "/usr/lib/x86_64-linux-gnu/libjsoncpp.so")
 find_package(OpenCV 3.2 REQUIRED)
 
 
-add_executable(StreamUnwrappedImages ${PROJECT_SOURCE_DIR}/src/StreamUnwarppecdImages.cpp src/ImageWrapper.cpp)
+add_executable(StreamUnwrappedImages ${PROJECT_SOURCE_DIR}/src/StreamUnwarppedImages.cpp src/ImageWrapper.cpp)
 add_executable(streamCameraVideo ${PROJECT_SOURCE_DIR}/src/streamCameraVideo.cpp)
 add_executable(calibrateCam ${PROJECT_SOURCE_DIR}/src/calibrateCam.cpp)
 
